@@ -19,6 +19,9 @@ const CalendarEvent = ({ event, onUpdate, onDelete, dayWidth = 100 }) => {
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
   const MS_PER_PIXEL = MS_PER_DAY / dayWidth;
 
+  // Check if the event was created recently (within the last 5 seconds)
+  const isNewEvent = Date.now() - event.id < 5000;
+
   useEffect(() => {
     setPreviewDates({ start: event.start, end: event.end });
   }, [event.start, event.end]);
@@ -132,17 +135,13 @@ const CalendarEvent = ({ event, onUpdate, onDelete, dayWidth = 100 }) => {
 
   const duration = Math.max(1, (previewDates.end.getTime() - previewDates.start.getTime()) / MS_PER_DAY);
 
-  const getHoverColorClass = (baseColor) => {
-    return baseColor.replace('-100', '-200');
-  };
-
   return (
     <>
       <div
         ref={eventRef}
         className={`absolute h-11 cursor-pointer rounded-md m-1 p-1 text-xs cursor-move transition-all duration-200 
           ${event.color} 
-          ${isHovered ? getHoverColorClass(event.color) : ''} 
+          ${isHovered ? event.hoverColor : ''} 
           ${isResizing ? "shadow-lg opacity-80" : ""}`}
         style={{
           width: `calc(${duration} * 100% - 2px)`,
@@ -160,7 +159,9 @@ const CalendarEvent = ({ event, onUpdate, onDelete, dayWidth = 100 }) => {
           setIsHovered(false);
         }}
       >
-        <div className="font-medium truncate">{event.title}</div>
+        <div className={`${isNewEvent || event.title === "New Event" ? "font-bold" : "font-medium"} truncate`}>
+          {event.title}
+        </div>
         <div className="text-gray-600 truncate">
           {formatTime(previewDates.start)} - {formatTime(previewDates.end)}
         </div>
@@ -196,7 +197,7 @@ const CalendarEvent = ({ event, onUpdate, onDelete, dayWidth = 100 }) => {
           }}
         >
           <div 
-            className="bg-white border border-black-100 rounded-lg  p-6 max-w-sm w-full mx-4"
+            className="bg-white border border-black-100 rounded-lg p-6 max-w-sm w-full mx-4"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
