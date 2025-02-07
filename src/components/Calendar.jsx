@@ -8,35 +8,49 @@ import AddResource from "./AddResource"
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
-  const [resources, setResources] = useState([
-    { id: "a", name: "Resource A" },
-    { id: "b", name: "Resource B" },
-    { id: "c", name: "Resource C" },
-    { id: "d", name: "Resource D" },
-    { id: "e", name: "Resource E" },
-    { id: "f", name: "Resource F" },
-    { id: "g", name: "Resource G" },
-    { id: "h", name: "Resource H" },
-    { id: "i", name: "Resource I" },
-  ])
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      resourceId: "a",
-      start: new Date(2025, 0, 10, 9, 0),
-      end: new Date(2025, 0, 13, 17, 0),
-      title: "Event 1",
-      color: "bg-blue-100",
-    },
-    {
-      id: 2,
-      resourceId: "b",
-      start: new Date(2025, 0, 11, 10, 0),
-      end: new Date(2025, 0, 12, 16, 0),
-      title: "Event 2",
-      color: "bg-green-100",
-    },
-  ])
+  const [resources, setResources] = useState(() => {
+    const storedResources = localStorage.getItem("calendarResources")
+    return storedResources
+      ? JSON.parse(storedResources)
+      : [
+          { id: "a", name: "Resource A" },
+          { id: "b", name: "Resource B" },
+          { id: "c", name: "Resource C" },
+          { id: "d", name: "Resource D" },
+          { id: "e", name: "Resource E" },
+          { id: "f", name: "Resource F" },
+          { id: "g", name: "Resource G" },
+          { id: "h", name: "Resource H" },
+          { id: "i", name: "Resource I" },
+        ]
+  })
+  const [events, setEvents] = useState(() => {
+    const storedEvents = localStorage.getItem("calendarEvents")
+    return storedEvents
+      ? JSON.parse(storedEvents).map((event) => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end),
+        }))
+      : [
+          {
+            id: 1,
+            resourceId: "a",
+            start: new Date(2025, 0, 10, 9, 0),
+            end: new Date(2025, 0, 13, 17, 0),
+            title: "Event 1",
+            color: "bg-blue-100",
+          },
+          {
+            id: 2,
+            resourceId: "b",
+            start: new Date(2025, 0, 11, 10, 0),
+            end: new Date(2025, 0, 12, 16, 0),
+            title: "Event 2",
+            color: "bg-green-100",
+          },
+        ]
+  })
 
   const calendarRef = useRef(null)
 
@@ -96,6 +110,14 @@ const Calendar = () => {
   useEffect(() => {
     scrollToDate(new Date())
   }, [scrollToDate])
+
+  useEffect(() => {
+    localStorage.setItem("calendarResources", JSON.stringify(resources))
+  }, [resources])
+
+  useEffect(() => {
+    localStorage.setItem("calendarEvents", JSON.stringify(events))
+  }, [events])
 
   return (
     <div className="flex flex-col h-screen">
